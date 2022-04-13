@@ -30,8 +30,8 @@ class MainFragment : Fragment() {
     private val viewModel by viewModels<MainFragmentViewModel>()
     private var _binding: FragmentAnimatedTextviewBinding? = null
     private val binding get() = _binding!!
-    private val textMovingAnim: Animation =
-        AnimationUtils.loadAnimation(requireContext(), R.anim.up_down_anim)
+//    private val textMovingAnim: Animation =
+//        AnimationUtils.loadAnimation(requireContext(), R.anim.up_down_anim)
 
     private val coordsArray = Array<Int>(2) { 0 }
     private var layoutPlaceParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
