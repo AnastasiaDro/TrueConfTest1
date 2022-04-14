@@ -87,13 +87,13 @@ class MainFragment : Fragment() {
             toBottomAnimator.duration = 7000
             toTopAnimator.duration = 7000
             toBottomAnimator.startDelay = 1000
-//            val topToBottomAnimation = TranslateAnimation(TranslateAnimation.RELATIVE_TO_SELF, 0f, TranslateAnimation.RELATIVE_TO_SELF, 0f, TranslateAnimation.RELATIVE_TO_SELF, 0f, TranslateAnimation.RELATIVE_TO_SELF, height - )
-//           topToBottomAnimation.duration = 5000
             animatedTextView.setOnClickListener {
-                //TODO
+                toBottomAnimator.pause()
+                toTopAnimator.pause()
+
             }
             mainFragmentFrame.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
-
+                animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
                 if (motionEvent.action == MotionEvent.ACTION_UP) {
                     AnimListener.animationCounter = 0
                     coordsArray[0] = motionEvent.x.toInt()
