@@ -12,6 +12,9 @@ import android.util.DisplayMetrics
 import android.util.TypedValue
 import android.view.*
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
@@ -31,14 +34,9 @@ class MainFragment : Fragment() {
     private val viewModel by viewModels<MainFragmentViewModel>()
     private var _binding: FragmentAnimatedTextviewBinding? = null
     private val binding get() = _binding!!
-
-    //    private val textMovingAnim: Animation =
-//        AnimationUtils.loadAnimation(requireContext(), R.anim.up_down_anim)
-    //private lateinit var topToBottomAnimation : TranslateAnimation
     private lateinit var toBottomAnimator: ObjectAnimator
     private lateinit var toTopAnimator: ObjectAnimator
     private lateinit var displayMetrics: DisplayMetrics
-
     private val coordsArray = Array<Int>(2) { 0 }
     private var layoutPlaceParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
 
@@ -76,7 +74,6 @@ class MainFragment : Fragment() {
                 coordsArray[1].toFloat(),
                 0f
             )
-            println("HERE ${view.height.toFloat()}")
 
             toTopAnimator.duration = 700
 
@@ -87,13 +84,13 @@ class MainFragment : Fragment() {
             toBottomAnimator.duration = 7000
             toTopAnimator.duration = 7000
             toBottomAnimator.startDelay = 1000
-//            val topToBottomAnimation = TranslateAnimation(TranslateAnimation.RELATIVE_TO_SELF, 0f, TranslateAnimation.RELATIVE_TO_SELF, 0f, TranslateAnimation.RELATIVE_TO_SELF, 0f, TranslateAnimation.RELATIVE_TO_SELF, height - )
-//           topToBottomAnimation.duration = 5000
             animatedTextView.setOnClickListener {
-                //TODO
+                toBottomAnimator.pause()
+                toTopAnimator.pause()
+
             }
             mainFragmentFrame.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
-
+                animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
                 if (motionEvent.action == MotionEvent.ACTION_UP) {
                     AnimListener.animationCounter = 0
                     coordsArray[0] = motionEvent.x.toInt()
