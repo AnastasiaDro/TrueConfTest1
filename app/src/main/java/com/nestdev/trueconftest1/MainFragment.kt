@@ -89,8 +89,8 @@ class MainFragment : Fragment() {
     }
 
     private fun initAnimators(toBottomAnimator: ObjectAnimator, toTopAnimator: ObjectAnimator) {
-        toBottomAnimator.addListener(AnimListener(toTopAnimator))
-        toTopAnimator.addListener(AnimListener(toBottomAnimator))
+        toBottomAnimator.addListener(AnimListener(toTopAnimator, AnimatorCode.TO_BOTTOM))
+        toTopAnimator.addListener(AnimListener(toBottomAnimator, AnimatorCode.TO_TOP))
         toBottomAnimator.duration = ANIMATION_DURATION
         toBottomAnimator.startDelay = ANIMATION_DELAY
         toTopAnimator.duration = ANIMATION_DURATION
@@ -115,7 +115,7 @@ class MainFragment : Fragment() {
          mainFragmentFrame.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
              animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
              if (motionEvent.action == MotionEvent.ACTION_UP) {
-                    AnimListener.animationCounter = 0
+                   // AnimListener.animationCounter = 0
                     view.performClick()
                     layoutPlaceParams.topMargin = motionEvent.y.toInt()
                     layoutPlaceParams.leftMargin = motionEvent.x.toInt()
