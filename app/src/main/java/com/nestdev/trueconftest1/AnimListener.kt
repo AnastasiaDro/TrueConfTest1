@@ -12,6 +12,7 @@ class AnimListener(private val nextAnimator: ObjectAnimator) : AnimatorListenerA
             animationCounter % 2 != 0 -> nextAnimator.setFloatValues(0f - marginTop, newFloatValue)
             animationCounter % 2 == 0  -> nextAnimator.setFloatValues(newFloatValue, 0f - marginTop)
         }
+        if (animationCounter == 1) nextAnimator.startDelay = 0
         nextAnimator.start()
         animationCounter++
     }

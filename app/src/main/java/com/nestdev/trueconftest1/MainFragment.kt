@@ -64,6 +64,27 @@ class MainFragment : Fragment() {
             toTopAnimator = ObjectAnimator.ofFloat(animatedTextView, "translationY", 0f, 0f)
             initAnimators(toBottomAnimator, toTopAnimator)
             initClickListeners(animatedTextView, mainFragmentFrame, deviceHeight.toFloat())
+
+//            mainFragmentFrame.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
+//                animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
+//                if (motionEvent.action == MotionEvent.ACTION_UP) {
+//                    toBottomAnimator.startDelay = ANIMATION_DELAY
+//                    AnimListener.animationCounter = 0
+//                    view.performClick()
+//                    layoutPlaceParams.topMargin = motionEvent.y.toInt()
+//                    layoutPlaceParams.leftMargin = motionEvent.x.toInt()
+//                    animatedTextView.layoutParams = layoutPlaceParams
+//                    val pixels = convertSpToPixels(animatedTextView.textSize, requireContext())
+//                    AnimListener.newFloatValue = height - motionEvent.y - pixels
+//                    AnimListener.marginTop = motionEvent.y
+//                    toBottomAnimator.setFloatValues(0f, height - motionEvent.y - pixels)//convertSpToPixels(animatedTextView.textSize, requireContext()))
+//                    toTopAnimator.setFloatValues(height - motionEvent.y - pixels, 0f - motionEvent.y)
+//                    toBottomAnimator.start()
+//                    toBottomAnimator.startDelay = 0
+//                }
+//                return@OnTouchListener true
+//            })
+
         }
     }
 
@@ -71,6 +92,7 @@ class MainFragment : Fragment() {
         toBottomAnimator.addListener(AnimListener(toTopAnimator))
         toTopAnimator.addListener(AnimListener(toBottomAnimator))
         toBottomAnimator.duration = ANIMATION_DURATION
+        toBottomAnimator.startDelay = ANIMATION_DELAY
         toTopAnimator.duration = ANIMATION_DURATION
     }
 
@@ -90,25 +112,23 @@ class MainFragment : Fragment() {
             toTopAnimator.pause()
         }
 
-        mainFragmentFrame.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
-            animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
-            if (motionEvent.action == MotionEvent.ACTION_UP) {
-                toBottomAnimator.startDelay = ANIMATION_DELAY
-                AnimListener.animationCounter = 0
-                view.performClick()
-                layoutPlaceParams.topMargin = motionEvent.y.toInt()
-                layoutPlaceParams.leftMargin = motionEvent.x.toInt()
-                animatedTextView.layoutParams = layoutPlaceParams
-                val pixels = convertSpToPixels(animatedTextView.textSize, requireContext())
-                AnimListener.newFloatValue = height - motionEvent.y - pixels
-                AnimListener.marginTop = motionEvent.y
-                toBottomAnimator.setFloatValues(0f, height - motionEvent.y - pixels)//convertSpToPixels(animatedTextView.textSize, requireContext()))
-                toTopAnimator.setFloatValues(height - motionEvent.y - pixels, 0f - motionEvent.y)
-                toBottomAnimator.start()
-                toBottomAnimator.startDelay = 0
-            }
-            return@OnTouchListener true
-        })
+         mainFragmentFrame.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
+             animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
+             if (motionEvent.action == MotionEvent.ACTION_UP) {
+                    AnimListener.animationCounter = 0
+                    view.performClick()
+                    layoutPlaceParams.topMargin = motionEvent.y.toInt()
+                    layoutPlaceParams.leftMargin = motionEvent.x.toInt()
+                    animatedTextView.layoutParams = layoutPlaceParams
+                    val pixels = convertSpToPixels(animatedTextView.textSize, requireContext())
+                    AnimListener.newFloatValue = height - motionEvent.y - pixels
+                    AnimListener.marginTop = motionEvent.y
+                    toBottomAnimator.setFloatValues(0f, height - motionEvent.y - pixels)//convertSpToPixels(animatedTextView.textSize, requireContext()))
+                    toTopAnimator.setFloatValues(height - motionEvent.y - pixels, 0f - motionEvent.y)
+                    toBottomAnimator.start()
+                }
+                return@OnTouchListener true
+            })
     }
 
     companion object {
