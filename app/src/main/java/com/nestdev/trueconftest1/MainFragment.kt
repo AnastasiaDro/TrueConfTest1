@@ -25,11 +25,12 @@ import com.nestdev.trueconftest1.databinding.FragmentAnimatedTextviewBinding
  * Решила создать отдельный фрагмент для анимации
  * Как сделала бы в проекте на будущее
  * для более лёгкой масштабируемости
+ * Вью модель делать не стала, но сделала бы при бОльшем размере проекта
  *
  * @author Anastasia Drogunova
  */
 
-const val ANIMATION_DELAY = 3000L
+const val ANIMATION_DELAY = 5000L
 const val ANIMATION_DURATION = 3500L
 
 
@@ -68,7 +69,8 @@ class MainFragment : Fragment() {
 
         with(binding) {
             val height = deviceHeight.toFloat()
-            toBottomAnimator = ObjectAnimator.ofFloat(animatedTextView, "translationY", 0f, height - 400f)
+            toBottomAnimator =
+                ObjectAnimator.ofFloat(animatedTextView, "translationY", 0f, height - 400f)
             toTopAnimator = ObjectAnimator.ofFloat(animatedTextView, "translationY", 0f, 0f)
             initClickListeners(animatedTextView, mainFragmentFrame, deviceHeight.toFloat())
         }
@@ -84,7 +86,11 @@ class MainFragment : Fragment() {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private fun initClickListeners(animatedTextView: TextView, mainFragmentFrame: LinearLayout, height: Float) {
+    private fun initClickListeners(
+        animatedTextView: TextView,
+        mainFragmentFrame: LinearLayout,
+        height: Float
+    ) {
         val pixels = convertSpToPixels(animatedTextView.textSize, requireContext())
         animSet.setTarget(animatedTextView)
 
@@ -99,35 +105,38 @@ class MainFragment : Fragment() {
         /**
          *  Обработка нажатия на точку экрана
          */
-         mainFragmentFrame.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
-             animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
-             if (motionEvent.action == MotionEvent.ACTION_UP) {
-                 isCancelled = true
-                 animSet.removeAllListeners()
-                 applyNewViewCoords(motionEvent, animatedTextView)
-                 val newFloatValue =  height - motionEvent.y - pixels
-                 val marginTop = motionEvent.y
-                 toBottomAnimator.setFloatValues(0f, height - motionEvent.y - pixels)
-                 toTopAnimator.setFloatValues(height - motionEvent.y - pixels, 0f - motionEvent.y)
-                 animSet.start()
-                 animSet.cancel()
-                 animSet.startDelay = ANIMATION_DELAY
-                    animSet.playSequentially(toBottomAnimator, toTopAnimator)
+        mainFragmentFrame.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
+            animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
+            if (motionEvent.action == MotionEvent.ACTION_UP) {
+                isCancelled = true
+                animSet.removeAllListeners()
+                applyNewViewCoords(motionEvent, animatedTextView)
+                val newFloatValue = height - motionEvent.y - pixels
+                val marginTop = motionEvent.y
+                toBottomAnimator.setFloatValues(0f, height - motionEvent.y - pixels)
+                toTopAnimator.setFloatValues(height - motionEvent.y - pixels, 0f - motionEvent.y)
+                animSet.start()
+                animSet.cancel()
+                animSet.startDelay = ANIMATION_DELAY
+                animSet.playSequentially(toBottomAnimator, toTopAnimator)
+                animSet.start()
+                animSet.doOnEnd {
+                    println(isCancelled)
+                    if (isCancelled) {
+                        toBottomAnimator.setFloatValues(0f - marginTop, newFloatValue)
+                        animSet.startDelay = 0
+                    }
+                    isCancelled = false
                     animSet.start()
-                 animSet.doOnEnd {
-                     println(isCancelled)
-                     if (isCancelled) {
-                         toBottomAnimator.setFloatValues(0f - marginTop, newFloatValue)
-                         animSet.startDelay = 0
-                     }
-                     isCancelled = false
-                     animSet.start()
-                 }
                 }
-                return@OnTouchListener true
-            })
+            }
+            return@OnTouchListener true
+        })
     }
 
+    /**
+     * Переместить текст в координаты точки касания
+     */
     private fun applyNewViewCoords(motionEvent: MotionEvent, view: View) {
         layoutPlaceParams = view.layoutParams as LinearLayout.LayoutParams
         layoutPlaceParams.topMargin = motionEvent.y.toInt()
