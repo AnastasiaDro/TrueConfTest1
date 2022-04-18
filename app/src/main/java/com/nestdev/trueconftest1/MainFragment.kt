@@ -87,17 +87,23 @@ class MainFragment : Fragment() {
     private fun initClickListeners(animatedTextView: TextView, mainFragmentFrame: LinearLayout, height: Float) {
         val pixels = convertSpToPixels(animatedTextView.textSize, requireContext())
         animSet.setTarget(animatedTextView)
+
+        /**
+         *  Обработка нажатия на текст
+         */
         animatedTextView.setOnClickListener {
-            isCancelled = true
             animSet.removeAllListeners()
             animSet.cancel()
+            isCancelled = true
         }
+        /**
+         *  Обработка нажатия на точку экрана
+         */
          mainFragmentFrame.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
              animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
              if (motionEvent.action == MotionEvent.ACTION_UP) {
                  isCancelled = true
                  animSet.removeAllListeners()
-                 println("1")
                  applyNewViewCoords(motionEvent, animatedTextView)
                  val newFloatValue =  height - motionEvent.y - pixels
                  val marginTop = motionEvent.y
@@ -111,12 +117,10 @@ class MainFragment : Fragment() {
                  animSet.doOnEnd {
                      println(isCancelled)
                      if (isCancelled) {
-                         println("2")
-                         println("here!!!!!")
                          toBottomAnimator.setFloatValues(0f - marginTop, newFloatValue)
                          animSet.startDelay = 0
-                         isCancelled = false
                      }
+                     isCancelled = false
                      animSet.start()
                  }
                 }
