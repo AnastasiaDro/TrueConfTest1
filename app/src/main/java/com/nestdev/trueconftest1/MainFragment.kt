@@ -86,14 +86,12 @@ class MainFragment : Fragment() {
     @SuppressLint("ClickableViewAccessibility")
     private fun initClickListeners(animatedTextView: TextView, mainFragmentFrame: LinearLayout, height: Float) {
         val pixels = convertSpToPixels(animatedTextView.textSize, requireContext())
+        animSet.setTarget(animatedTextView)
         animatedTextView.setOnClickListener {
             isCancelled = true
             animSet.removeAllListeners()
             animSet.cancel()
         }
-        animSet.setTarget(animatedTextView)
-
-
          mainFragmentFrame.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
              animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
              if (motionEvent.action == MotionEvent.ACTION_UP) {
@@ -128,8 +126,6 @@ class MainFragment : Fragment() {
         layoutPlaceParams.leftMargin = motionEvent.x.toInt()
         view.layoutParams = layoutPlaceParams
     }
-
-
 
     companion object {
         fun create() = MainFragment()
