@@ -70,18 +70,9 @@ class MainFragment : Fragment() {
             val height = deviceHeight.toFloat()
             toBottomAnimator = ObjectAnimator.ofFloat(animatedTextView, "translationY", 0f, height - 400f)
             toTopAnimator = ObjectAnimator.ofFloat(animatedTextView, "translationY", 0f, 0f)
-      //      initAnimators(toBottomAnimator, toTopAnimator, animatedTextView)
             initClickListeners(animatedTextView, mainFragmentFrame, deviceHeight.toFloat())
         }
     }
-
-//    private fun initAnimators(toBottomAnimator: ObjectAnimator, toTopAnimator: ObjectAnimator, animatedTextView: TextView) {
-//        toBottomAnimator.addListener(AnimListener(toTopAnimator, AnimatorCode.TO_BOTTOM, animatedTextView))
-//        toTopAnimator.addListener(AnimListener(toBottomAnimator, AnimatorCode.TO_TOP, animatedTextView))
-//        toBottomAnimator.duration = ANIMATION_DURATION
-//        toBottomAnimator.startDelay = ANIMATION_DELAY
-//        toTopAnimator.duration = ANIMATION_DURATION
-//    }
 
     private fun convertSpToPixels(sp: Float, context: Context): Int {
         return TypedValue.applyDimension(
@@ -94,28 +85,23 @@ class MainFragment : Fragment() {
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initClickListeners(animatedTextView: TextView, mainFragmentFrame: LinearLayout, height: Float) {
+        val pixels = convertSpToPixels(animatedTextView.textSize, requireContext())
         animatedTextView.setOnClickListener {
-//            toBottomAnimator.pause()
-//            toTopAnimator.pause()
-          //  isCancelled = true
-            animSet.pause()
+            isCancelled = true
+            animSet.removeAllListeners()
+            animSet.cancel()
         }
         animSet.setTarget(animatedTextView)
-        val pixels = convertSpToPixels(animatedTextView.textSize, requireContext())
+
 
          mainFragmentFrame.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
              animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
              if (motionEvent.action == MotionEvent.ACTION_UP) {
                  isCancelled = true
                  animSet.cancel()
-                 layoutPlaceParams = animatedTextView.layoutParams as LinearLayout.LayoutParams
-                 layoutPlaceParams.topMargin = motionEvent.y.toInt()
-                 layoutPlaceParams.leftMargin = motionEvent.x.toInt()
-                 animatedTextView.layoutParams = layoutPlaceParams
+                 applyNewViewCoords(motionEvent, animatedTextView)
                  val newFloatValue =  height - motionEvent.y - pixels
                  val marginTop = motionEvent.y
-//                 AnimListener.newFloatValue = height - motionEvent.y - pixels
-//                 AnimListener.marginTop = motionEvent.y
                  toBottomAnimator.setFloatValues(0f, height - motionEvent.y - pixels)
                  toTopAnimator.setFloatValues(height - motionEvent.y - pixels, 0f - motionEvent.y)
                  animSet.start()
@@ -125,8 +111,7 @@ class MainFragment : Fragment() {
                     animSet.start()
                  animSet.doOnEnd {
                      if (isCancelled) {
-                         toBottomAnimator.setFloatValues(0f - marginTop,//AnimListener.marginTop,
-                             newFloatValue)//AnimListener.newFloatValue)
+                         toBottomAnimator.setFloatValues(0f - marginTop, newFloatValue)
                          animSet.startDelay = 0
                      }
                     isCancelled = false
@@ -136,6 +121,15 @@ class MainFragment : Fragment() {
                 return@OnTouchListener true
             })
     }
+
+    private fun applyNewViewCoords(motionEvent: MotionEvent, view: View) {
+        layoutPlaceParams = view.layoutParams as LinearLayout.LayoutParams
+        layoutPlaceParams.topMargin = motionEvent.y.toInt()
+        layoutPlaceParams.leftMargin = motionEvent.x.toInt()
+        view.layoutParams = layoutPlaceParams
+    }
+
+
 
     companion object {
         fun create() = MainFragment()
