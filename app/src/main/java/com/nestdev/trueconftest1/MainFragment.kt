@@ -1,6 +1,9 @@
 package com.nestdev.trueconftest1
 
+import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
+import android.animation.ValueAnimator.REVERSE
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Point
@@ -12,6 +15,7 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.RequiresApi
+import androidx.core.animation.doOnEnd
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.nestdev.trueconftest1.databinding.FragmentAnimatedTextviewBinding
@@ -25,7 +29,7 @@ import com.nestdev.trueconftest1.databinding.FragmentAnimatedTextviewBinding
  * @author Anastasia Drogunova
  */
 
-const val ANIMATION_DELAY = 500L
+const val ANIMATION_DELAY = 3000L
 const val ANIMATION_DURATION = 3500L
 
 
@@ -35,6 +39,8 @@ class MainFragment : Fragment() {
     private lateinit var toBottomAnimator: ObjectAnimator
     private lateinit var toTopAnimator: ObjectAnimator
     private var layoutPlaceParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
+    private var animSet = AnimatorSet()
+    var isCancelled = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,23 +63,25 @@ class MainFragment : Fragment() {
             windowManager.defaultDisplay.getSize(point)
             point.y
         }
+        animSet.duration = ANIMATION_DURATION
+        animSet.startDelay = ANIMATION_DELAY
 
         with(binding) {
             val height = deviceHeight.toFloat()
             toBottomAnimator = ObjectAnimator.ofFloat(animatedTextView, "translationY", 0f, height - 400f)
             toTopAnimator = ObjectAnimator.ofFloat(animatedTextView, "translationY", 0f, 0f)
-            initAnimators(toBottomAnimator, toTopAnimator, animatedTextView)
+      //      initAnimators(toBottomAnimator, toTopAnimator, animatedTextView)
             initClickListeners(animatedTextView, mainFragmentFrame, deviceHeight.toFloat())
         }
     }
 
-    private fun initAnimators(toBottomAnimator: ObjectAnimator, toTopAnimator: ObjectAnimator, animatedTextView: TextView) {
-        toBottomAnimator.addListener(AnimListener(toTopAnimator, AnimatorCode.TO_BOTTOM, animatedTextView))
-        toTopAnimator.addListener(AnimListener(toBottomAnimator, AnimatorCode.TO_TOP, animatedTextView))
-        toBottomAnimator.duration = ANIMATION_DURATION
-        toBottomAnimator.startDelay = ANIMATION_DELAY
-        toTopAnimator.duration = ANIMATION_DURATION
-    }
+//    private fun initAnimators(toBottomAnimator: ObjectAnimator, toTopAnimator: ObjectAnimator, animatedTextView: TextView) {
+//        toBottomAnimator.addListener(AnimListener(toTopAnimator, AnimatorCode.TO_BOTTOM, animatedTextView))
+//        toTopAnimator.addListener(AnimListener(toBottomAnimator, AnimatorCode.TO_TOP, animatedTextView))
+//        toBottomAnimator.duration = ANIMATION_DURATION
+//        toBottomAnimator.startDelay = ANIMATION_DELAY
+//        toTopAnimator.duration = ANIMATION_DURATION
+//    }
 
     private fun convertSpToPixels(sp: Float, context: Context): Int {
         return TypedValue.applyDimension(
@@ -87,24 +95,43 @@ class MainFragment : Fragment() {
     @SuppressLint("ClickableViewAccessibility")
     private fun initClickListeners(animatedTextView: TextView, mainFragmentFrame: LinearLayout, height: Float) {
         animatedTextView.setOnClickListener {
-            toBottomAnimator.pause()
-            toTopAnimator.pause()
+//            toBottomAnimator.pause()
+//            toTopAnimator.pause()
+          //  isCancelled = true
+            animSet.pause()
         }
+        animSet.setTarget(animatedTextView)
         val pixels = convertSpToPixels(animatedTextView.textSize, requireContext())
 
          mainFragmentFrame.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
              animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
              if (motionEvent.action == MotionEvent.ACTION_UP) {
-                    layoutPlaceParams = animatedTextView.layoutParams as LinearLayout.LayoutParams
-                    layoutPlaceParams.topMargin = motionEvent.y.toInt()
-                    layoutPlaceParams.leftMargin = motionEvent.x.toInt()
-                    animatedTextView.layoutParams = layoutPlaceParams
-                    AnimListener.newFloatValue = height - motionEvent.y - pixels
-                    AnimListener.marginTop = motionEvent.y
-                    toBottomAnimator.setFloatValues(0f, height - motionEvent.y - pixels)
-                    toTopAnimator.setFloatValues(height - motionEvent.y - pixels, 0f - motionEvent.y)
-                    toBottomAnimator.start()
-                    AnimListener.isCanceled = false
+                 isCancelled = true
+                 animSet.cancel()
+                 layoutPlaceParams = animatedTextView.layoutParams as LinearLayout.LayoutParams
+                 layoutPlaceParams.topMargin = motionEvent.y.toInt()
+                 layoutPlaceParams.leftMargin = motionEvent.x.toInt()
+                 animatedTextView.layoutParams = layoutPlaceParams
+                 val newFloatValue =  height - motionEvent.y - pixels
+                 val marginTop = motionEvent.y
+//                 AnimListener.newFloatValue = height - motionEvent.y - pixels
+//                 AnimListener.marginTop = motionEvent.y
+                 toBottomAnimator.setFloatValues(0f, height - motionEvent.y - pixels)
+                 toTopAnimator.setFloatValues(height - motionEvent.y - pixels, 0f - motionEvent.y)
+                 animSet.start()
+                 animSet.cancel()
+                 animSet.startDelay = ANIMATION_DELAY
+                    animSet.playSequentially(toBottomAnimator, toTopAnimator)
+                    animSet.start()
+                 animSet.doOnEnd {
+                     if (isCancelled) {
+                         toBottomAnimator.setFloatValues(0f - marginTop,//AnimListener.marginTop,
+                             newFloatValue)//AnimListener.newFloatValue)
+                         animSet.startDelay = 0
+                     }
+                    isCancelled = false
+                     animSet.start()
+                 }
                 }
                 return@OnTouchListener true
             })
