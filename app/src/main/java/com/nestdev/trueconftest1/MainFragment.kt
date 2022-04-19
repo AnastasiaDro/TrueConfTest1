@@ -2,8 +2,6 @@ package com.nestdev.trueconftest1
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
-import android.animation.ValueAnimator.REVERSE
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Point
@@ -17,7 +15,6 @@ import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.core.animation.doOnEnd
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import com.nestdev.trueconftest1.databinding.FragmentAnimatedTextviewBinding
 
 
@@ -75,6 +72,9 @@ class MainFragment : Fragment() {
         }
     }
 
+    /**
+     * Конверсия размера текста в пиксели
+     */
     private fun convertSpToPixels(sp: Float, context: Context): Int {
         return TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_SP,
@@ -99,8 +99,8 @@ class MainFragment : Fragment() {
          */
         animatedTextView.setOnClickListener {
             animSet.removeAllListeners()
-            animSet.pause()
-            isPaused = true
+            animSet.cancel()
+         //   isPaused = true
         }
         /**
          *  Обработка нажатия на точку экрана
@@ -109,19 +109,16 @@ class MainFragment : Fragment() {
             animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
             var isFirst =  true
             if (motionEvent.action == MotionEvent.ACTION_UP) {
-                println("1111111 $isCancelled")
+                animSet.removeAllListeners()
                 animSet.cancel()
                 applyNewViewCoords(motionEvent.x.toInt(), motionEvent.y.toInt(), animatedTextView)
                 newFloatValue = height - motionEvent.y - pixels
                 marginTop = motionEvent.y
                 toBottomAnimator.setFloatValues(0f, height - motionEvent.y - pixels)
                 toTopAnimator.setFloatValues(height - motionEvent.y - pixels, 0f - motionEvent.y)
-                if (isPaused) {
-                    animSet.startDelay = 0
-                    animSet.start()
-                    animSet.cancel()
-                    isPaused = false
-                }
+                animSet.startDelay = 0
+                animSet.start()
+                animSet.cancel()
                 animSet.startDelay = ANIMATION_DELAY
                 animSet.playSequentially(toBottomAnimator, toTopAnimator)
                 animSet.start()
