@@ -65,8 +65,6 @@ class MainFragment : Fragment() {
             point.y
         }
         animSet.duration = ANIMATION_DURATION
-        animSet.startDelay = ANIMATION_DELAY
-
         with(binding) {
             val height = deviceHeight.toFloat()
             toBottomAnimator =
@@ -93,13 +91,14 @@ class MainFragment : Fragment() {
     ) {
         val pixels = convertSpToPixels(animatedTextView.textSize, requireContext())
         animSet.setTarget(animatedTextView)
-
+        var newFloatValue = 0f
+        var marginTop = 0f
         /**
          *  Обработка нажатия на текст
          */
         animatedTextView.setOnClickListener {
             animSet.removeAllListeners()
-            animSet.cancel()
+            animSet.pause()
             isCancelled = true
         }
         /**
@@ -110,11 +109,12 @@ class MainFragment : Fragment() {
             if (motionEvent.action == MotionEvent.ACTION_UP) {
                 isCancelled = true
                 animSet.removeAllListeners()
-                applyNewViewCoords(motionEvent, animatedTextView)
-                val newFloatValue = height - motionEvent.y - pixels
-                val marginTop = motionEvent.y
+                applyNewViewCoords(motionEvent.x.toInt(), motionEvent.y.toInt(), animatedTextView)
+                newFloatValue = height - motionEvent.y - pixels
+                marginTop = motionEvent.y
                 toBottomAnimator.setFloatValues(0f, height - motionEvent.y - pixels)
                 toTopAnimator.setFloatValues(height - motionEvent.y - pixels, 0f - motionEvent.y)
+                animSet.startDelay = 0
                 animSet.start()
                 animSet.cancel()
                 animSet.startDelay = ANIMATION_DELAY
@@ -137,12 +137,18 @@ class MainFragment : Fragment() {
     /**
      * Переместить текст в координаты точки касания
      */
-    private fun applyNewViewCoords(motionEvent: MotionEvent, view: View) {
+    private fun applyNewViewCoords(x: Int, y: Int, view: View) {
         layoutPlaceParams = view.layoutParams as LinearLayout.LayoutParams
-        layoutPlaceParams.topMargin = motionEvent.y.toInt()
-        layoutPlaceParams.leftMargin = motionEvent.x.toInt()
+        layoutPlaceParams.topMargin = y
+        layoutPlaceParams.leftMargin = x
         view.layoutParams = layoutPlaceParams
     }
+
+//    private fun applyNewViewCoords(coef: Float, view: View) {
+//        layoutPlaceParams = view.layoutParams as LinearLayout.LayoutParams
+//        layoutPlaceParams.topMargin = (layoutPlaceParams.topMargin - layoutPlaceParams.topMargin * coef).toInt()
+//        view.layoutParams = layoutPlaceParams
+//    }
 
     companion object {
         fun create() = MainFragment()
