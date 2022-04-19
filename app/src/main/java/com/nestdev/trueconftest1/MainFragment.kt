@@ -42,6 +42,7 @@ class MainFragment : Fragment() {
     private var layoutPlaceParams = LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
     private var animSet = AnimatorSet()
     var isCancelled = false
+    var isPaused = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -99,7 +100,7 @@ class MainFragment : Fragment() {
         animatedTextView.setOnClickListener {
             animSet.removeAllListeners()
             animSet.pause()
-            isCancelled = true
+            isPaused = true
         }
         /**
          *  Обработка нажатия на точку экрана
@@ -108,15 +109,17 @@ class MainFragment : Fragment() {
             animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
             if (motionEvent.action == MotionEvent.ACTION_UP) {
                 isCancelled = true
-                animSet.removeAllListeners()
                 applyNewViewCoords(motionEvent.x.toInt(), motionEvent.y.toInt(), animatedTextView)
                 newFloatValue = height - motionEvent.y - pixels
                 marginTop = motionEvent.y
                 toBottomAnimator.setFloatValues(0f, height - motionEvent.y - pixels)
                 toTopAnimator.setFloatValues(height - motionEvent.y - pixels, 0f - motionEvent.y)
-                animSet.startDelay = 0
-                animSet.start()
-                animSet.cancel()
+                if (isPaused) {
+                    animSet.startDelay = 0
+                    animSet.start()
+                    animSet.cancel()
+                    isPaused = false
+                }
                 animSet.startDelay = ANIMATION_DELAY
                 animSet.playSequentially(toBottomAnimator, toTopAnimator)
                 animSet.start()
