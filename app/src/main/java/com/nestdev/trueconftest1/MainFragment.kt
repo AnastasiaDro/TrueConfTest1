@@ -107,8 +107,10 @@ class MainFragment : Fragment() {
          */
         mainFragmentFrame.setOnTouchListener(View.OnTouchListener { view, motionEvent ->
             animatedTextView.setTextColor(requireContext().getColor(R.color.clicked_text_color))
+            var isFirst =  true
             if (motionEvent.action == MotionEvent.ACTION_UP) {
-                isCancelled = true
+                println("1111111 $isCancelled")
+                animSet.cancel()
                 applyNewViewCoords(motionEvent.x.toInt(), motionEvent.y.toInt(), animatedTextView)
                 newFloatValue = height - motionEvent.y - pixels
                 marginTop = motionEvent.y
@@ -124,13 +126,14 @@ class MainFragment : Fragment() {
                 animSet.playSequentially(toBottomAnimator, toTopAnimator)
                 animSet.start()
                 animSet.doOnEnd {
-                    println(isCancelled)
-                    if (isCancelled) {
-                        toBottomAnimator.setFloatValues(0f - marginTop, newFloatValue)
-                        animSet.startDelay = 0
-                    }
-                    isCancelled = false
                     animSet.start()
+                }
+                toTopAnimator.doOnEnd {
+                    if (isFirst) {
+                        animSet.startDelay = 0
+                        toBottomAnimator.setFloatValues(0f - marginTop, newFloatValue)
+                        isFirst = false
+                    }
                 }
             }
             return@OnTouchListener true
@@ -146,12 +149,6 @@ class MainFragment : Fragment() {
         layoutPlaceParams.leftMargin = x
         view.layoutParams = layoutPlaceParams
     }
-
-//    private fun applyNewViewCoords(coef: Float, view: View) {
-//        layoutPlaceParams = view.layoutParams as LinearLayout.LayoutParams
-//        layoutPlaceParams.topMargin = (layoutPlaceParams.topMargin - layoutPlaceParams.topMargin * coef).toInt()
-//        view.layoutParams = layoutPlaceParams
-//    }
 
     companion object {
         fun create() = MainFragment()
